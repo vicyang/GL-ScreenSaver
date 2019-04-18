@@ -16,21 +16,21 @@
 int winID;
 GLUtesselator   *tobj;
 
-static double vtx[5000][3];
-static int    vtx_contours[100];
-static int    Vi;
-static int    vtx_ctsi;
-static float  red = 0.0;
-static int    PARTS = 3.0;  //曲线细分程度
-static long   code;
+double vtx[5000][3];
+int    vtx_contours[100];
+int    Vi;
+int    vtx_ctsi;
+float  red = 0.0;
+int    PARTS = 3.0;  //曲线细分程度
+long   code;
 
-extern FT_Library      library;
-extern FT_Face         face;
+FT_Library      library;
+FT_Face         face;
 
-extern FT_GlyphSlot    slot;
-extern FT_Error        error;
-extern FT_Outline      outline;
-extern FT_BBox         box;
+FT_GlyphSlot    slot;
+FT_Error        error;
+FT_Outline      outline;
+FT_BBox         box;
 
 float angx = 0.0;
 float angy = 0.0;
