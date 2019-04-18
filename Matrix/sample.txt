@@ -1,0 +1,50 @@
+ // Update each option
+poll.find('[data-poll-option-id]').each(function() {
+    var $this = $(this);
+    var optionId = $this.attr('data-poll-option-id');
+    var voted = (typeof res.user_votes[optionId] !== 'undefined');
+    var mostVoted = (res.vote_counts[optionId] === mostVotes);
+    var percent = (!res.total_votes) ? 0 : Math.round((res.vote_counts[optionId] / res.total_votes) * 100);
+    var percentRel = (mostVotes === 0) ? 0 : Math.round((res.vote_counts[optionId] / mostVotes) * 100);
+    var altText;
+
+    altText = $this.attr('data-alt-text');
+    if (voted) {
+        $this.attr('title', $.trim(altText));
+    } else {
+        $this.attr('title', '');
+    };
+    $this.toggleClass('voted', voted);
+    $this.toggleClass('most-votes', mostVoted);
+
+    // Update the bars
+    var bar = $this.find('.resultbar div');
+    var barTimeLapse = (res.can_vote) ? 500 : 1500;
+    var newBarClass = (percent === 100) ? 'pollbar5' : 'pollbar' + (Math.floor(percent / 20) + 1);
+
+    setTimeout(function () {
+        bar.animate({ width: percentRel + '%' }, 500)
+            .removeClass('pollbar1 pollbar2 pollbar3 pollbar4 pollbar5')
+            .addClass(newBarClass)
+            .html(res.vote_counts[optionId]);
+
+        var percentText = percent ? percent + '%' : res.NO_VOTES;
+        $this.find('.poll_option_percent').html(percentText);
+    }, barTimeLapse);
+});
+
+if (!res.can_vote) {
+    poll.find('.polls').delay(400).fadeIn(500);
+}
+
+// Display "Your vote has been cast." message. Disappears after 5 seconds.
+var confirmationDelay = (res.can_vote) ? 300 : 900;
+poll.find('.vote-submitted').delay(confirmationDelay).slideDown(200, function() {
+    if (resultsVisible) {
+        updatePanelHeight();
+    }
+
+    $(this).delay(5000).fadeOut(500, function() {
+        resizePanel(300);
+    });
+});

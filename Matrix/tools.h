@@ -6,6 +6,8 @@
 typedef struct { float x, y; } point;
 
 void ft_init(void);
-int LoadGlyph(long symbol);
+int LoadGlyph(char symbol);
 void PointOnQuadBeizer(point cp[3], double t, double *vt );
 void GetDatafromOutline(void);
+
+int load_text(char **buff, int *len);

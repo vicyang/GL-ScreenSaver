@@ -56,7 +56,7 @@ void ft_init(void)
                     );
 }
 
-int LoadGlyph(long symbol)
+int LoadGlyph(char symbol)
 {
     //这里可以是unicode编码值，字体必须支持才行
     FT_UInt index = FT_Get_Char_Index(face, symbol);
