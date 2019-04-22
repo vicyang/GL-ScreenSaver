@@ -10,11 +10,11 @@
 #include "tools.h"
 
 #define SIZE_X 720
-#define SIZE_Y 1080
+#define SIZE_Y 1280
 
 // Rain的数量, 长度
 #define N_RAIN 50
-#define N_TEXT 50
+#define N_TEXT 80
 
 int winID;
 GLUtesselator   *tobj;
@@ -120,8 +120,8 @@ void display(void)
         glPushMatrix();
         
         //glTranslatef(-12000.0 + RXlist[m], 5000.0 + RYlist[m],  RZlist[m]);
-        glTranslatef(rain[m].x, rain[m].y, rain[m].z);
-        //glRotatef( (float)m/(float)N_RAIN * 10.0, 0.0, 1.0, 0.0 );
+        glTranslatef(rain[m].x, rain[m].y+22000.0, rain[m].z);
+        glRotatef( (float)m/(float)N_RAIN * 30.0, 0.0, 1.0, 0.0 );
         for (int n = 0; n < N_TEXT ; n++ )
         {
             //向下移位
@@ -152,16 +152,20 @@ void display(void)
 void idle(void)
 {
     usleep(30000);
-    angx += 0.1;
     if (angz < 20.0)
+    {
         angz += 1.0;
+    }
     else
+    {
+        angx += 0.1, angz += 0.1;
         if (angy < 30.0)
-            angy += 0.5, angx += 0.2;;
+            angy += 0.5;
+    }
 
-    angx += rx;
-    angy += ry;
-    angz += rz;
+    angx += rx*0.6;
+    angy += ry*0.6;
+    angz += rz*0.6;
 
     int r;
     for (int id = 0; id < N_RAIN; id++ )
@@ -195,65 +199,11 @@ void reshape(int Width, int Height)
     glMatrixMode(GL_PROJECTION);              // 投影视图矩阵
     glLoadIdentity();
     //glOrtho(-half, half, -half, half, 0.0, 40000.0);
-    gluPerspective(100.0, w/h, 10.0, 80000.0);
+    gluPerspective(100.0, w/h, 10.0, 800000.0);
     glMatrixMode(GL_MODELVIEW);               // 模型视图矩阵
     glLoadIdentity();
     gluLookAt(0.0,0.0,fa, 0.0,0.0,0.0, 0.0,1.0,fa);  //设置观察点
             // 观察点，   朝向的坐标， 观察点向上坐标
-}
-
-void keyup(unsigned char key, int mousex, int mousey)
-{
-    int errcode;
-    // ctype.h
-    char k = tolower(key);
-    switch (k)
-    {
-        case 'w':
-        case 's':
-            rx = 0.0;
-            break;
-        case 'a':
-        case 'd':
-            rz = 0.0;
-            break;
-        case 'j':
-        case 'k':
-            ry = 0.0;
-            break;
-    }
-}
-
-void keypress(unsigned char key, int mousex, int mousey)
-{
-    int errcode;
-    // ctype.h
-    char k = tolower(key);
-    switch (k)
-    {
-        case 'q':
-            glutDestroyWindow(winID);
-            exit(0);
-            break;
-        case 'w':
-            rx = 1.0;
-            break;
-        case 's':
-            rx = -1.0;
-            break;
-        case 'a':
-            rz = -1.0;
-            break;
-        case 'd':
-            rz = 1.0;
-            break;
-        case 'j':
-            ry = 1.0;
-            break;
-        case 'k':
-            ry = -1.0;
-            break;
-    }
 }
 
 void init(void)
@@ -273,7 +223,7 @@ void init(void)
     printf("chars %d\n", n_char);
 
     //glutFullScreen();
-    srand( time(NULL) );
+    srand( 12 );
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glLineWidth( 1.0 );
     glPointSize( 2.0 );
@@ -294,6 +244,8 @@ void init(void)
     //gluTessProperty(tobj, GLU_TESS_BOUNDARY_ONLY, GL_TRUE);
     gluTessProperty(tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
     
+
+    // rain 初始化
     for (int id = 0; id < N_RAIN; id++)
     {
         //制造参差效果
@@ -353,7 +305,63 @@ void init(void)
         glEndList();
     }
 
+    usleep(999999);
 }
+
+void keyup(unsigned char key, int mousex, int mousey)
+{
+    int errcode;
+    // ctype.h
+    char k = tolower(key);
+    switch (k)
+    {
+        case 'w':
+        case 's':
+            rx = 0.0;
+            break;
+        case 'a':
+        case 'd':
+            rz = 0.0;
+            break;
+        case 'j':
+        case 'k':
+            ry = 0.0;
+            break;
+    }
+}
+
+void keypress(unsigned char key, int mousex, int mousey)
+{
+    int errcode;
+    // ctype.h
+    char k = tolower(key);
+    switch (k)
+    {
+        case 'q':
+            glutDestroyWindow(winID);
+            exit(0);
+            break;
+        case 'w':
+            rx = 1.0;
+            break;
+        case 's':
+            rx = -1.0;
+            break;
+        case 'a':
+            rz = -1.0;
+            break;
+        case 'd':
+            rz = 1.0;
+            break;
+        case 'j':
+            ry = 1.0;
+            break;
+        case 'k':
+            ry = -1.0;
+            break;
+    }
+}
+
 
 int main( int argc, char** argv )
 {
