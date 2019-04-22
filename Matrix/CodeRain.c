@@ -39,6 +39,7 @@ float angx = 0.0;
 float angy = 0.0;
 float angz = 0.0;
 
+// Rains
 struct RAIN {
     float progress;
     float speed;
@@ -51,7 +52,7 @@ char str[] = "          abcdefghijklmnopqrstuvwxyz,ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@
 
 char *uni;
 static int n_char;
-static int arr[N_RAIN][N_TEXT];
+static int mat[N_RAIN][N_TEXT];
 
 //与wasdjk按键关联，-1, 0, 1
 float rx = 0.0;
@@ -137,7 +138,7 @@ void display(void)
             {
                 glColor3f((float)n/(float)N_TEXT/1.5, (float)m/(float)N_RAIN, 0.3);
             }
-            glCallList( arr[m][n] );
+            glCallList( mat[m][n] );
             glPopMatrix();
         }
         
@@ -152,12 +153,11 @@ void idle(void)
 {
     usleep(30000);
     angx += 0.1;
-    if (angz < 20.0) {
+    if (angz < 20.0)
         angz += 1.0;
-    } else {
+    else
         if (angy < 30.0)
             angy += 0.5, angx += 0.2;;
-    }
 
     angx += rx;
     angy += ry;
@@ -166,10 +166,11 @@ void idle(void)
     int r;
     for (int id = 0; id < N_RAIN; id++ )
     {
+        //struct RAIN *this = &rain[id];  // this->blah
         if ( rain[id].progress < n_char  )
         {
             rain[id].progress += rain[id].speed;
-            arr[id][(int)rain[id].progress % N_TEXT] = (int) rain[id].progress;
+            mat[id][(int)rain[id].progress % N_TEXT] = (int) rain[id].progress;
         }
         else
         {
@@ -178,7 +179,6 @@ void idle(void)
         }
         rain[id].bright = (int)rain[id].progress % N_TEXT;
     }
-
 
     glutPostRedisplay();
 }
@@ -308,7 +308,7 @@ void init(void)
         //填入空白；显示列表的索引，从1开始
         for (int j = 0; j < N_TEXT; j++)
         {
-            arr[id][j] = 1;
+            mat[id][j] = 1;
         }
     }
 
