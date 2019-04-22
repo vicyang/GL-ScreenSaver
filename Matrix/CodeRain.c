@@ -6,10 +6,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
+#include <ctype.h>
 #include "tools.h"
 
-#define SIZE_X 500
-#define SIZE_Y 500
+#define SIZE_X 720
+#define SIZE_Y 1080
+
+// Rain的数量, 长度
 #define N_RAIN 50
 #define N_TEXT 50
 
@@ -35,9 +38,11 @@ FT_BBox         box;
 float angx = 0.0;
 float angy = 0.0;
 float angz = 0.0;
+
 float progress[N_RAIN];
 float speed[N_RAIN];
 float bright[N_RAIN];
+
 float RXlist[N_RAIN];
 float RYlist[N_RAIN];
 float RZlist[N_RAIN];
@@ -47,6 +52,11 @@ char str[] = "          abcdefghijklmnopqrstuvwxyz,ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@
 char *uni;
 static int n_char;
 static int arr[N_RAIN][N_TEXT];
+
+//与wasdjk按键关联，-1, 0, 1
+float rx = 0.0;
+float ry = 0.0;
+float rz = 0.0;
 
 void beginCallback(GLenum which)
 {
@@ -142,15 +152,19 @@ void idle(void)
 {
     usleep(30000);
     angx += 0.1;
-    if (angz < 90.0) 
+    if (angz < 20.0) 
     {
         angz += 1.0;
     }
     else
     {
         if (angy < 50.0)
-            angy += 0.2;
+            angy += 0.5, angx += 0.2;;
     }
+
+    angx += rx;
+    angy += ry;
+    angz += rz;
 
     int r;
     for (int i = 0; i < N_RAIN; i++ )
@@ -174,7 +188,7 @@ void idle(void)
 
 void reshape(int Width, int Height)
 {
-    const float fa = 20000.0;
+    const float fa = 30000.0;
     const float half = 8000.0;
 
     float w = (float)Width;
@@ -191,45 +205,56 @@ void reshape(int Width, int Height)
             // 观察点，   朝向的坐标， 观察点向上坐标
 }
 
+void keyup(unsigned char key, int mousex, int mousey)
+{
+    int errcode;
+    // ctype.h
+    char k = tolower(key);
+    switch (k)
+    {
+        case 'w':
+        case 's':
+            rx = 0.0;
+            break;
+        case 'a':
+        case 'd':
+            rz = 0.0;
+            break;
+        case 'j':
+        case 'k':
+            ry = 0.0;
+            break;
+    }
+}
+
 void keypress(unsigned char key, int mousex, int mousey)
 {
     int errcode;
-    switch (key)
+    // ctype.h
+    char k = tolower(key);
+    switch (k)
     {
         case 'q':
-        case 'Q':
             glutDestroyWindow(winID);
             exit(0);
-            break;            
+            break;
         case 'w':
-        case 'W':
-            angx += 1.0;
-            glutPostRedisplay();
+            rx = 1.0;
             break;
         case 's':
-        case 'S':
-            angx -= 1.0;
-            glutPostRedisplay();
+            rx = -1.0;
             break;
         case 'a':
-        case 'A':
-            angz += 1.0;
-            glutPostRedisplay();
+            rz = -1.0;
             break;
         case 'd':
-        case 'D':
-            angz -= 1.0;
-            glutPostRedisplay();
+            rz = 1.0;
             break;
         case 'j':
-        case 'J':
-            angy += 2.0;
-            glutPostRedisplay();
+            ry = 1.0;
             break;
         case 'k':
-        case 'K':
-            angy -= 2.0;
-            glutPostRedisplay();
+            ry = -1.0;
             break;
     }
 }
@@ -341,14 +366,14 @@ int main( int argc, char** argv )
     printf("\n");
 
     glutInit(&argc, argv);
-                    //显示模式     双缓冲          RGBA
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA |GLUT_DEPTH | GLUT_MULTISAMPLE );
     glutInitWindowSize(SIZE_X, SIZE_Y);
-    glutInitWindowPosition(200, 200);
+    glutInitWindowPosition(200, 0);
     winID = glutCreateWindow("Fonts");
     init();
     glutDisplayFunc(display);
     glutKeyboardFunc(keypress);
+    glutKeyboardUpFunc(keyup);
     glutReshapeFunc(reshape);
     glutIdleFunc(idle);
     glutMainLoop();

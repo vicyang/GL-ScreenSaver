@@ -1,5 +1,6 @@
 @echo off
 
+set path=%path%;../DLL
 set NAME=CodeRain
 set SRC=CodeRain.c outline.c loadtext.c
 set INCDIR=-ID:\Lib\freeglut-MinGW-3.0.0-1.mp\include -ID:/lib/freetype-2.7/include -I./
