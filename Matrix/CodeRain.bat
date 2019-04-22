@@ -11,7 +11,7 @@ set LIB=-lfreeglut -lopengl32 -lglu32 -lfreetype -lpng -lz
 gcc -std=c11 %SRC% -o "%NAME%" %INCDIR% %LIBDIR% %LIB%
 
 :Run
-if %errorlevel% == 0 (
+if %errorlevel% == 0
 	CodeRain.exe
 ) else (
 	echo Compile Error

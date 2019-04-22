@@ -39,13 +39,13 @@ float angx = 0.0;
 float angy = 0.0;
 float angz = 0.0;
 
-float progress[N_RAIN];
-float speed[N_RAIN];
-float bright[N_RAIN];
+struct RAIN {
+    float progress;
+    float speed;
+    float bright;
+    float x, y, z;
+} rain[N_RAIN];
 
-float RXlist[N_RAIN];
-float RYlist[N_RAIN];
-float RZlist[N_RAIN];
 char str[] = "          abcdefghijklmnopqrstuvwxyz,ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+-={}|[];':<>,./\\?";
 //char uni[] = "          abcdefghijklmnopqrstuvwxyz,ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+-={}|[];':<>,./\\?";
 
@@ -119,8 +119,8 @@ void display(void)
         glPushMatrix();
         
         //glTranslatef(-12000.0 + RXlist[m], 5000.0 + RYlist[m],  RZlist[m]);
-        glTranslatef(RXlist[m], RYlist[m]+20000.0, RZlist[m]);
-        glRotatef( (float)m/(float)N_RAIN * 10.0, 0.0, 1.0, 0.0 );
+        glTranslatef(rain[m].x, rain[m].y, rain[m].z);
+        //glRotatef( (float)m/(float)N_RAIN * 10.0, 0.0, 1.0, 0.0 );
         for (int n = 0; n < N_TEXT ; n++ )
         {
             //向下移位
@@ -128,7 +128,7 @@ void display(void)
 
             glPushMatrix();
             glRotatef(-90.0, 0.0, 0.0, 1.0);
-            if ( n == bright[m] )
+            if ( n == rain[m].bright )
             {
                 glColor3f((float)n/(float)N_TEXT, (float)m/(float)N_RAIN+0.2, 0.5);
                 glScalef(1.2, 1.2, 1.2);
@@ -152,13 +152,10 @@ void idle(void)
 {
     usleep(30000);
     angx += 0.1;
-    if (angz < 20.0) 
-    {
+    if (angz < 20.0) {
         angz += 1.0;
-    }
-    else
-    {
-        if (angy < 50.0)
+    } else {
+        if (angy < 30.0)
             angy += 0.5, angx += 0.2;;
     }
 
@@ -167,19 +164,19 @@ void idle(void)
     angz += rz;
 
     int r;
-    for (int i = 0; i < N_RAIN; i++ )
+    for (int id = 0; id < N_RAIN; id++ )
     {
-        if ( progress[i] < n_char  )
+        if ( rain[id].progress < n_char  )
         {
-            progress[i] += speed[i];
-            arr[i][ (int)progress[i] % N_TEXT ] = (int)progress[i];
+            rain[id].progress += rain[id].speed;
+            arr[id][(int)rain[id].progress % N_TEXT] = (int) rain[id].progress;
         }
         else
         {
-            progress[i] = 1.0;
-            RYlist[i] = (float)(rand() % 20 - 10) * 1000.0;
+            rain[id].progress = 1.0;
+            rain[id].y = (float)(rand() % 20 - 10) * 1000.0;
         }
-        bright[i] = (int)progress[i] % N_TEXT;
+        rain[id].bright = (int)rain[id].progress % N_TEXT;
     }
 
 
@@ -266,7 +263,14 @@ void init(void)
     vtx_ctsi = 0;
     int bgn;
     int next;
-    int base;  //for Display List
+    int base;  //显示列表的起点
+
+    //初始化 FreeType 并加载字形数据
+    ft_init();
+    LoadGlyph(code);
+    GetDatafromOutline();
+    load_text(&uni, &n_char);
+    printf("chars %d\n", n_char);
 
     //glutFullScreen();
     srand( time(NULL) );
@@ -290,21 +294,21 @@ void init(void)
     //gluTessProperty(tobj, GLU_TESS_BOUNDARY_ONLY, GL_TRUE);
     gluTessProperty(tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
     
-    for (int i = 0; i < N_RAIN; i++)
+    for (int id = 0; id < N_RAIN; id++)
     {
         //制造参差效果
-        RXlist[i] = (float)(rand() % 20 - 10) * 3000.0;
-        RYlist[i] = (float)(rand() % 20 - 10) * 2000.0;
-        RZlist[i] = (float)(rand() % 20 - 10) * 2000.0;
+        rain[id].x = (float)(rand() % 20 - 10) * 3000.0;
+        rain[id].y = (float)(rand() % 20 - 10) * 2000.0;
+        rain[id].z = (float)(rand() % 20 - 10) * 2000.0;
 
         //随机进度、递进速度
-        progress[i] = (float) ((rand()%50 + 1) * 1);
-        speed[i]    = (float) ( rand()%5 + 1) / 8.0;
+        rain[id].progress = (float) ((rand()%50 + 1) * 1);
+        rain[id].speed    = (float) ( rand()%5 + 1) / 8.0;
 
         //填入空白；显示列表的索引，从1开始
         for (int j = 0; j < N_TEXT; j++)
         {
-            arr[i][j] = 1;
+            arr[id][j] = 1;
         }
     }
 
@@ -353,18 +357,6 @@ void init(void)
 
 int main( int argc, char** argv )
 {
-    ft_init();
-    LoadGlyph(code);
-    GetDatafromOutline();
-    
-    load_text(&uni, &n_char);
-
-    for (int i=0; i<outline.n_contours; i++  )
-    {
-        printf("Contour %d: %d\n", i, outline.contours[i]);
-    }
-    printf("\n");
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA |GLUT_DEPTH | GLUT_MULTISAMPLE );
     glutInitWindowSize(SIZE_X, SIZE_Y);
