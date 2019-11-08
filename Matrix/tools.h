@@ -11,3 +11,4 @@ void PointOnQuadBeizer(point cp[3], double t, double *vt );
 void GetDatafromOutline(void);
 
 int load_text(char **buff, int *len);
+int read_lines(char (*line)[], int *lines);

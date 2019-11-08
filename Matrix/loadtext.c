@@ -15,3 +15,23 @@ int load_text(char **buff, int *len)
     printf("Text Length: %d\n", size);
     return 0;
 }
+
+int read_lines(char (*line)[], int *lines)
+{
+    FILE *fp = fopen("sample.txt", "r");
+
+    *lines = 0;
+    while ( fp != NULL )
+    {
+        if ( ! fgets( line[ *lines++ ], 1024, fp ) ) { break; }
+    }
+
+    printf("lines: %d\n", *lines);
+
+    for (int n = 0; n < *lines; n++)
+    {
+        printf("%s", line[n]);
+    }
+
+    return 0;
+}
